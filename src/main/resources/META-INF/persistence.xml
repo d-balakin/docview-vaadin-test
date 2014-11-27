@@ -7,7 +7,7 @@
 	<persistence-unit name="documentviewer" transaction-type="JTA">
 		<jta-data-source>jdbc/documentviewer</jta-data-source>
 		<properties>
-			<property name="javax.persistence.schema-generation.database.action" value="drop-create"/>
+			<property name="javax.persistence.schema-generation.database.action" value="drop-and-create"/>
 		</properties>
 	</persistence-unit>
 </persistence>

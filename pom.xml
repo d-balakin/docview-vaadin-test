@@ -22,6 +22,10 @@
             <id>vaadin-addons</id>
             <url>http://maven.vaadin.com/vaadin-addons</url>
         </repository>
+		<repository>
+			<id>maven-local</id>
+			<url>file:${project.basedir}/maven-local</url>
+		</repository>
     </repositories>
 
     <dependencies>
@@ -78,6 +82,11 @@
             <artifactId>vaadin-themes</artifactId>
             <version>${vaadin.version}</version>
         </dependency>
+		<dependency>
+			<groupId>com.j256.simplemagic</groupId>
+			<artifactId>simplemagic</artifactId>
+			<version>1.6</version>
+		</dependency>
 
 		<dependency>
 			<groupId>com.vaadin</groupId>
@@ -90,6 +99,24 @@
 			<version>2.1.1</version>
 		</dependency>
     </dependencies>
+
+	<profiles>
+		<profile>
+			<id>aspose</id>
+			<dependencies>
+				<dependency>
+					<groupId>com.aspose</groupId>
+					<artifactId>aspose-cells-jdk16</artifactId>
+					<version>8.3.0.0</version>
+				</dependency>
+				<dependency>
+					<groupId>com.aspose</groupId>
+					<artifactId>aspose-words-jdk16</artifactId>
+					<version>14.10.0.0</version>
+				</dependency>
+			</dependencies>
+		</profile>
+	</profiles>
 
     <build>
         <plugins>
@@ -141,7 +168,7 @@
                     <!-- Remove draftCompile when project is ready -->
                     <draftCompile>false</draftCompile>
 
-                    <style>OBF</style>
+                    <style>DETAILED</style>
                     <strict>true</strict>
                 </configuration>
                 <executions>
