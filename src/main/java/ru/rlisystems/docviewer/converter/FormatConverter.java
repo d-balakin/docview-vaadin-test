@@ -8,14 +8,14 @@ import java.util.Collections;
 import java.util.EventListener;
 import java.util.List;
 
-public interface MediaConverter
+public interface FormatConverter
 {
 	boolean isApplicable (Format fromFormat, Format toFormat);
 	ConversationTask makeConversationTask (Format fromFormat, Format toFormat, File from, File to);
 
-	default float getPriority ()
+	default String getConverterClass ()
 	{
-		return 0;
+		return "default";
 	}
 
 	public static interface ConversationTask extends Runnable

@@ -20,7 +20,7 @@ import static ru.rlisystems.docviewer.converter.Format.*;
 
 @Log
 @Singleton
-public class StarOfficeConverter implements MediaConverter
+public class StarOfficeConverter implements FormatConverter
 {
 	private static final Map<Format, List<Format>> AVAILABLE_CONVERSIONS = Format.matrixBuilder()
 			.from(MICROSOFT_WORD).to(MICROSOFT_EXCEL_OOXML, OPEN_DOCUMENT_TEXT, PORTABLE_DOCUMENT_FORMAT)
@@ -32,10 +32,10 @@ public class StarOfficeConverter implements MediaConverter
 			.from(TEXT_PLAIN).to(PORTABLE_DOCUMENT_FORMAT)
 		.build();
 
-	@Inject @ConfigurationValue (name = "ru.rlisystems.docviewer.soffice_exec", defaultValue = "soffice")
+	@Inject @ConfigurationValue (name = "ru.rlisystems.docviewer.convert.soffice_exec", defaultValue = "soffice")
 	private Instance<String> starOfficePathParam;
 
-	@Inject @ConfigurationValue (name = "ru.rlisystems.docviewer.soffice_timeout_ms", defaultValue = "60000")
+	@Inject @ConfigurationValue (name = "ru.rlisystems.docviewer.convert.soffice_timeout_ms", defaultValue = "60000")
 	private Instance<Integer> processTimeoutMs;
 
 	private String checkedStarOfficePath;
@@ -69,17 +69,22 @@ public class StarOfficeConverter implements MediaConverter
 								"--outdir", tempDirectory.getPath(), from.getPath() };
 						Process process = new ProcessBuilder(command).start();
 						log.finest("Запуск процесса конвертации " + Arrays.toString(command));
-						if (process.waitFor(processTimeoutMs.get(), TimeUnit.MILLISECONDS) && process.exitValue() == 0) {
+						if (process.waitFor(processTimeoutMs.get(), TimeUnit.MILLISECONDS))
+						{
 							File[] files = tempDirectory.listFiles();
-							if (files == null || files.length != 1) {
-								throw new RuntimeException();
+							if (process.exitValue() == 0 && files != null && files.length == 1) {
+								Files.move(files[0].toPath(), to.toPath());
+								setState(ConversationTaskEvent.State.COMPLETED);
+								log.finest("Конвертация завершена " + Arrays.toString(command));
 							}
-							Files.move(files[0].toPath(), to.toPath());
-							setState(ConversationTaskEvent.State.COMPLETED);
-							log.finest("Конвертация завершена " + Arrays.toString(command));
+							else {
+								setState(ConversationTaskEvent.State.FAILURE);
+								log.severe("Ошибка конвертации '" + readProcessOutput(process, true) + "' (" +
+																					Arrays.toString(command) + ")");
+							}
 						}
 						else {
-							log.log(Level.SEVERE, "Таймаут конвертации");
+							log.severe("Таймаут конвертации");
 							setState(ConversationTaskEvent.State.FAILURE);
 							process.destroyForcibly().waitFor();
 						}
@@ -128,17 +133,9 @@ public class StarOfficeConverter implements MediaConverter
 				Process process = new ProcessBuilder(starOfficePath, "--version").start();
 				if (process.waitFor(processTimeoutMs.get(), TimeUnit.MILLISECONDS)) {
 					if (process.exitValue() == 0) {
-						StringBuilder stringBuilder = new StringBuilder();
-						try (InputStream is = process.getInputStream();
-							 InputStreamReader isr = new InputStreamReader(is))
-						{
-							char[] buf = new char[1024];
-							for (int c; (c = isr.read(buf)) != -1;) {
-								stringBuilder.append(buf, 0, c);
-							}
-						}
+						String output = readProcessOutput(process, false);
 						starOfficeAvailable = true;
-						log.info("Используется " + stringBuilder.toString().replaceAll("[\r\n]", ""));
+						log.info("Используется " + output.replaceAll("[\r\n]", ""));
 					}
 				}
 				else {
@@ -153,5 +150,25 @@ public class StarOfficeConverter implements MediaConverter
 			}
 		}
 		return starOfficeAvailable ? checkedStarOfficePath : null;
+	}
+
+	private static String readProcessOutput (Process process, boolean errorStream) throws IOException
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		try (InputStream is = errorStream ? process.getErrorStream() : process.getInputStream();
+			 InputStreamReader isr = new InputStreamReader(is))
+		{
+			char[] buf = new char[1024];
+			for (int c; (c = isr.read(buf)) != -1;) {
+				stringBuilder.append(buf, 0, c);
+			}
+		}
+		return stringBuilder.toString();
+	}
+
+	@Override
+	public String getConverterClass ()
+	{
+		return "soffice";
 	}
 }
