@@ -32,4 +32,49 @@
 @mixin mytheme {
   @include valo;
   // Insert your own theme rules here
+
+  .my-button-outlineless:focus:after {
+    border: none;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+  }
+
+  .my-toolbar-background {
+    @include background-image(linear-gradient(to bottom, #f6f8f9 0%, #e5ebee 50%, #d7dee3 51%, #f5f7f9 100%));
+  }
+
+  .my-shadowed-panel {
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 0px 50px 10px;
+  }
+
+  .my-light-gradient {
+    @include background-image(linear-gradient(to bottom, transparent 30%, #E7ECFA));
+  }
+
+  .v-panel-caption-my-shadowed-panel {
+    @include background-image(linear-gradient(to bottom, #C3D8DF 2%, #f6f6f6 98%));
+  }
+
+  .v-table {
+    background: none;
+  }
+
+  form.my-upload-button .v-button,
+  form.my-upload-button .v-button .v-button-wrap {
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+
+  form.my-upload-button .v-button-wrap:before {
+    font-family: FontAwesome;
+    content: "\F093";
+    padding: 0 8px 0 0;
+  }
+
+  form.my-upload-button .v-button:focus:after {
+    border: none;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+  }
 }
