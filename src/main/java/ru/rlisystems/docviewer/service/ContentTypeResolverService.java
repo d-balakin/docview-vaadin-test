@@ -8,8 +8,6 @@ import ru.rlisystems.docviewer.ConfigurationInjector.ConfigurationValue;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.regex.Matcher;
@@ -41,20 +39,13 @@ public class ContentTypeResolverService
 		}
 	}
 
-	public ContentType resolve (File file) throws IOException
-	{
-		try (FileInputStream fileInputStream = new FileInputStream(file)) {
-			return resolve(fileInputStream, file.getName());
-		}
-	}
-
 	public ContentType resolve (InputStream inputStream, String fileName) throws IOException
 	{
 		ContentInfo match = contentInfoUtil.findMatch(inputStream);
-		if (match != null) {
+		if (match != null && match.getMimeType() != null) {
 			return new ContentType(match.getName(), match.getMessage(), match.getMimeType());
 		}
-		if (resolveByExtension && fileName != null && fileName.isEmpty()) {
+		if (resolveByExtension && fileName != null && !fileName.isEmpty()) {
 			Matcher matcher = EXTENSION_PATTERN.matcher(fileName);
 			if (matcher.find()) {
 				String extension = matcher.group(1);

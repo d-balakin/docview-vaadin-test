@@ -3,8 +3,8 @@ package ru.rlisystems.docviewer.service;
 import lombok.extern.java.Log;
 import ru.rlisystems.docviewer.ConfigurationInjector.ConfigurationValue;
 import ru.rlisystems.docviewer.converter.Format;
-import ru.rlisystems.docviewer.converter.MediaConverter;
-import ru.rlisystems.docviewer.converter.MediaConverter.ConversationTask;
+import ru.rlisystems.docviewer.converter.FormatConverter;
+import ru.rlisystems.docviewer.converter.FormatConverter.ConversationTask;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -13,18 +13,17 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import java.io.File;
-import java.util.TreeSet;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.*;
 
 @Log
 @ApplicationScoped
-public class MediaConverterService
+public class FormatConverterExecutorService
 {
 	@Inject
-	private Instance<MediaConverter> mediaConverterInstance;
+	private Instance<FormatConverter> formatConverterInstance;
 
 	@Inject @ConfigurationValue (name = "ru.rlisystems.docviewer.convert.max_pool", defaultValue = "-1")
 	private int maximumPoolSize;
@@ -35,15 +34,19 @@ public class MediaConverterService
 	@Inject @ConfigurationValue (name = "ru.rlisystems.docviewer.convert.pool_queue_cap", defaultValue = "100")
 	private int poolQueueCapacity;
 
+	@Inject @ConfigurationValue (name = "ru.rlisystems.docviewer.convert.preferred_class", defaultValue = "aspose")
+	private Instance<String> preferredConverterClass;
+
 	@Resource
 	private ManagedThreadFactory managedThreadFactory;
 
+	private BlockingQueue<Runnable> queue;
 	private ExecutorService executorService;
 
 	@PostConstruct
 	private void postConstruct ()
 	{
-		LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(poolQueueCapacity);
+		queue = new LinkedBlockingQueue<>(poolQueueCapacity);
 		int maximumPoolSize = this.maximumPoolSize;
 		if (maximumPoolSize < 1) {
 			maximumPoolSize = Runtime.getRuntime().availableProcessors();
@@ -54,20 +57,28 @@ public class MediaConverterService
 
 	public ConversationTask process (Format fromFormat, Format toFormat, File from, File to)
 	{
-		TreeSet<MediaConverter> applicableSet = new TreeSet<>((o1, o2) ->
-														Float.compare(o1.getPriority(), o2.getPriority()));
-
-		for (MediaConverter mediaConverter : mediaConverterInstance) {
-			if (mediaConverter.isApplicable(fromFormat, toFormat)) {
-				applicableSet.add(mediaConverter);
+		List<FormatConverter> converters = new ArrayList<>();
+		for (FormatConverter formatConverter : formatConverterInstance) {
+			if (formatConverter.isApplicable(fromFormat, toFormat)) {
+				converters.add(formatConverter);
 			}
 		}
-		if (applicableSet.isEmpty()) {
+		if (converters.isEmpty()) {
 			throw new IllegalArgumentException("Конвертация " + from + " => " + to + " не поддерживается");
 		}
-		MediaConverter mediaConverter = applicableSet.last();
-		ConversationTask conversationTask = mediaConverter.makeConversationTask(fromFormat, toFormat, from, to);
+		FormatConverter formatConverter = converters.get(0);
+		String preferredConverterClass = this.preferredConverterClass.get();
+		for (FormatConverter converter : converters) {
+			if (Objects.equals(preferredConverterClass, converter.getConverterClass())) {
+				formatConverter = converter;
+			}
+		}
+		ConversationTask conversationTask = formatConverter.makeConversationTask(fromFormat, toFormat, from, to);
 		executorService.submit(conversationTask);
+		log.finest(String.format("Отправлена задача, размер очереди: %d/%d, конвертация: %s => %s," +
+								 " файлы: %s => %s, конвертор: %s",
+										queue.size(), queue.remainingCapacity() + queue.size(), fromFormat, toFormat,
+										from, to, formatConverter));
 		return conversationTask;
 	}
 }
