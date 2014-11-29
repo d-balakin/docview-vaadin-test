@@ -39,20 +39,12 @@
     box-shadow: none;
   }
 
-  .my-toolbar-background {
-    @include background-image(linear-gradient(to bottom, #f6f8f9 0%, #e5ebee 50%, #d7dee3 51%, #f5f7f9 100%));
-  }
-
   .my-shadowed-panel {
     box-shadow: rgba(0, 0, 0, 0.16) 0px 0px 50px 10px;
   }
 
-  .my-light-gradient {
-    @include background-image(linear-gradient(to bottom, transparent 30%, #E7ECFA));
-  }
-
   .v-panel-caption-my-shadowed-panel {
-    @include background-image(linear-gradient(to bottom, #C3D8DF 2%, #f6f6f6 98%));
+    @include background-image(linear-gradient(to bottom, #CFCFCF 2%, #F6F6F6 98%));
   }
 
   .v-table {
