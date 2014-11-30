@@ -1,0 +1,20 @@
+<project>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.aspose</groupId>
+    <artifactId>aspose-cells-jdk16</artifactId>
+    <packaging>jar</packaging>
+    <name>Aspose.Cells for Java</name>
+    <version>8.3.0.0</version>
+    <description>
+        Aspose.Cells for Java is an award-winning Excel Spreadsheet component that allows Java developers to embed the ability to read, write and manipulate Excel spreadsheets, HTML, MHTML, PDF and image file formats into their own Java applications without needing to rely on Microsoft Excel.
+    </description>
+    <url>http://www.aspose.com/java/excel-component.aspx</url>
+    <dependencies>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk16</artifactId>
+            <version>1.46</version>
+            <type>jar</type>
+        </dependency>
+    </dependencies>
+</project>

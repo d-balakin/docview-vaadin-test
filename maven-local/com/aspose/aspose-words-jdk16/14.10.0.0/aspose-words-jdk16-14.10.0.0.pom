@@ -1,0 +1,8 @@
+<project>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.aspose</groupId>
+    <artifactId>aspose-words-jdk16</artifactId>
+    <packaging>jar</packaging>
+    <name>Aspose.Words for Java</name>
+    <version>14.10.0.0</version>
+</project>
