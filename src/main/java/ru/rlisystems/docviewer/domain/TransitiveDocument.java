@@ -2,18 +2,22 @@ package ru.rlisystems.docviewer.domain;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
 
+@Table (name = "TRANSITIVE_DOCUMENTS", uniqueConstraints =
+										@UniqueConstraint(columnNames = { "DOCUMENT_ID", "MIME_TYPE" }))
 @Entity
-@Table (name = "TRANSITIVE_DOCUMENTS")
+@ToString
 public class TransitiveDocument
 {
 	@Id
 	@Getter @Setter
 	@Column (name = "ID")
+	@GeneratedValue (strategy = GenerationType.IDENTITY)
 	private Integer id;
 
 	@NotNull
@@ -31,9 +35,4 @@ public class TransitiveDocument
 	@Getter @Setter
 	@Column (name = "MIME_TYPE")
 	private String mimeType;
-
-	@NotNull
-	@Getter @Setter
-	@Column (name = "LAST_ACCESS")
-	private Date lastAccess;
 }

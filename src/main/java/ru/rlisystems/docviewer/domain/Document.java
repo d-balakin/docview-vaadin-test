@@ -2,11 +2,13 @@ package ru.rlisystems.docviewer.domain;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 @Entity
+@ToString
 @Table (name = "DOCUMENTS")
 public class Document
 {

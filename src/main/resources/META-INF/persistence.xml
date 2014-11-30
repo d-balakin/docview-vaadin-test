@@ -4,8 +4,8 @@
              xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence
                                  http://www.oracle.com/webfolder/technetwork/jsc/xml/ns/persistence/persistence_2_1.xsd">
 
-	<persistence-unit name="documentviewer" transaction-type="JTA">
-		<jta-data-source>jdbc/documentviewer</jta-data-source>
+	<persistence-unit name="decviewer" transaction-type="JTA">
+		<jta-data-source>jdbc/docviewer</jta-data-source>
 		<properties>
 			<property name="javax.persistence.schema-generation.database.action" value="drop-and-create"/>
 		</properties>

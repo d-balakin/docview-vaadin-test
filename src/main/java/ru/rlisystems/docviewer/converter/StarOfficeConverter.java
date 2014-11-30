@@ -68,23 +68,23 @@ public class StarOfficeConverter implements FormatConverter
 						String[] command = { getStarOfficePath(), "--headless", "--convert-to", toFormatExtension,
 								"--outdir", tempDirectory.getPath(), from.getPath() };
 						Process process = new ProcessBuilder(command).start();
-						log.finest("Запуск процесса конвертации " + Arrays.toString(command));
+						log.finest("Запуск процесса преобразования " + Arrays.toString(command));
 						if (process.waitFor(processTimeoutMs.get(), TimeUnit.MILLISECONDS))
 						{
 							File[] files = tempDirectory.listFiles();
 							if (process.exitValue() == 0 && files != null && files.length == 1) {
-								Files.move(files[0].toPath(), to.toPath());
+								Files.move(files[0].toPath(), to.toPath(), StandardCopyOption.REPLACE_EXISTING);
 								setState(ConversationTaskEvent.State.COMPLETED);
-								log.finest("Конвертация завершена " + Arrays.toString(command));
+								log.finest("Преобразование завершено " + Arrays.toString(command));
 							}
 							else {
 								setState(ConversationTaskEvent.State.FAILURE);
-								log.severe("Ошибка конвертации '" + readProcessOutput(process, true) + "' (" +
+								log.severe("Ошибка преобразования '" + readProcessOutput(process, true) + "' (" +
 																					Arrays.toString(command) + ")");
 							}
 						}
 						else {
-							log.severe("Таймаут конвертации");
+							log.severe("Таймаут преобразования");
 							setState(ConversationTaskEvent.State.FAILURE);
 							process.destroyForcibly().waitFor();
 						}
@@ -94,7 +94,7 @@ public class StarOfficeConverter implements FormatConverter
 					}
 				}
 				catch (Exception ex) {
-					log.log(Level.SEVERE, "Ошибка конвертации документа", ex);
+					log.log(Level.SEVERE, "Ошибка преобразования документа", ex);
 					if (getState() != ConversationTaskEvent.State.COMPLETED) {
 						setState(ConversationTaskEvent.State.FAILURE);
 					}

@@ -22,14 +22,16 @@ public enum Format
 		this.fileExtensions = Collections.unmodifiableList(Arrays.asList(fileExtensions));
 	}
 
-	public static Optional<Format> valueOfMimeType (String mimeType)
+	public static Format valueOfMimeType (String mimeType)
 	{
-		return Arrays.asList(values()).stream().filter(f -> f.mimeType.equals(mimeType)).findFirst();
+		return Arrays.asList(values()).stream()
+				.filter(f -> f.mimeType.equals(mimeType)).findFirst().orElse(null);
 	}
 
-	public static Optional<Format> valueOfFileExtension (String fileExtension)
+	public static Format valueOfFileExtension (String fileExtension)
 	{
-		return Arrays.asList(values()).stream().filter(f -> f.fileExtensions.contains(fileExtension)).findFirst();
+		return Arrays.asList(values()).stream()
+				.filter(f -> f.fileExtensions.contains(fileExtension)).findFirst().orElse(null);
 	}
 
 	public static FormatMatrixBuilder matrixBuilder ()
@@ -48,9 +50,9 @@ public enum Format
 
 	public static boolean isApplicable(Map<Format, List<Format>> matrixMap, String fromMimeType, String toMimeType)
 	{
-		Optional<Format> from = Format.valueOfMimeType(fromMimeType);
-		Optional<Format> to = Format.valueOfMimeType(toMimeType);
-		return from.isPresent() && to.isPresent() && isApplicable(matrixMap, from.get(), to.get());
+		Format from = Format.valueOfMimeType(fromMimeType);
+		Format to = Format.valueOfMimeType(toMimeType);
+		return from != null && to != null && isApplicable(matrixMap, from, to);
 	}
 
 	public static class FormatMatrixBuilder
